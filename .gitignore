@@ -1,0 +1,6 @@
+.env
+.envcr
+*.swp
+.venv
+*.pyc
+moehlenhoff-exporter.py
