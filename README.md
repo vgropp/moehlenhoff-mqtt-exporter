@@ -45,7 +45,7 @@ scrape_configs:
 
 ## Configuration
 
-`moehlenhoff-mqtt-exporter.py` requires `PROXY_PORTS`, which lists each controller with its proxy port, for example `PROXY_PORTS="192.0.2.71:9171,192.0.2.72:9172"`. The scrape interval and HTTP port are configured near the top of the script.
+`moehlenhoff-mqtt-exporter.py` requires `PROXY_PORTS`, which lists each controller with its proxy port, for example `PROXY_PORTS="192.0.2.71:9171,192.0.2.72:9172"`. The scrape interval and HTTP port are configured near the top of the script. `moehlenhoff-cli.py` prints the rooms of each station once and reads the controllers from the same `PROXY_PORTS`, ignoring the ports.
 
 MQTT is disabled unless `MQTT_BROKER` is set. The MQTT exporter uses port `1883` and the `homeassistant` discovery prefix. If your broker requires authentication, set both `MQTT_USER` and `MQTT_PASS`, for example:
 
