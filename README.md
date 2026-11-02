@@ -120,7 +120,9 @@ The stations' own `static.xml` does contain those secrets. The proxy replaces `P
 
 The exporter reports system status, room temperatures and states, valve openings, and wireless thermostat battery and signal readings. Metrics have an `ip` label, and room/device metrics include labels identifying the relevant room or device.
 
-`moehlenhoff_up{ip="..."}` is `1` when the controller responds with valid XML and `0` when the request fails or the XML cannot be parsed. Missing, invalid, or non-finite readings are logged and omitted. This keeps unavailable measurements distinct from real readings of `0`. Old samples for a controller are cleared on each scrape so failed or incomplete reads do not leave stale values.
+`moehlenhoff_up{ip="..."}` is `1` when the controller responds with valid XML and `0` when the request fails, the response is cut off or the XML cannot be parsed. A failed read keeps the last good data: metrics, MQTT state and the proxy's answers stay as they were, so a single dropped response does not make entities unavailable. Only after 5 minutes without a valid scrape (`CACHE_MAX_AGE`) are the controller's metrics removed and its MQTT availability set to `offline`, at the same time as the proxy starts answering `503`.
+
+Missing, invalid, or non-finite readings are logged and omitted. This keeps unavailable measurements distinct from real readings of `0`. After a valid scrape, old samples for a controller are replaced, so incomplete data does not leave stale values.
 
 ## Troubleshooting
 

@@ -728,9 +728,11 @@ class Station:
             ET.ParseError,
         ) as exc:
             logger.warning("Unable to scrape Moehlenhoff host %s: %s", self.ip, exc)
-            clear_host_metrics(self.ip)
             host_up_gauge.labels(ip=self.ip).set(0)
-            publish_host_availability(self.ip, "offline")
+            # A single failed read keeps the last good data; only an outage takes it away
+            if self.fresh_cache() is None:
+                clear_host_metrics(self.ip)
+                publish_host_availability(self.ip, "offline")
             return
 
         self.cache = (mask_secrets(body), content_type, time.monotonic())
@@ -741,10 +743,12 @@ class Station:
 
     def write(self, data, content_type):
         """Forward a change to the base and get the cache re-read afterwards."""
-        result = self.request(CHANGES_PATH, data, content_type)
-        self.settled.clear()
-        self.write_pending.set()
-        return result
+        try:
+            return self.request(CHANGES_PATH, data, content_type)
+        finally:
+            # Even a failed request may have reached the base, e.g. a cut-off response
+            self.settled.clear()
+            self.write_pending.set()
 
     def fresh_cache(self):
         cache = self.cache
